@@ -1,0 +1,543 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="叠印">
+<meta name="theme-color" content="#efe5cf">
+<meta name="description" content="叠印：新中式水墨三消。层层叠叠，三枚相同即消，槽满七枚即败。">
+<meta name="author" content="wilsonmah">
+<meta name="copyright" content="© 2026 wilsonmah. All Rights Reserved.">
+<title>叠印 Stamp Stack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap&text=梅松竹菊月山水云风花雪鹤叠印过败三消第关">
+<style>
+:root{--paper:#efe5cf;--ink:#2a2420;--red:#b5352a;--red-d:#7d2219;--tw:48px;--th:54px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--paper);color:var(--ink);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;font-family:"Songti SC","Noto Serif SC","STSong","SimSun",serif}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.55;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .15  0 0 0 .14 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.cal{font-family:"Ma Shan Zheng","Kaiti SC","STKaiti","KaiTi","Songti SC",serif;font-weight:400}
+#bg{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+#bg .sun{position:absolute;right:-40px;top:12%;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,#d9543f 0,#c8432f 60%,rgba(200,67,47,0) 72%);opacity:.18}
+#bg svg{position:absolute;left:0;bottom:0;width:100%;height:42%}
+#probeT{position:fixed;top:0;height:env(safe-area-inset-top);width:1px;visibility:hidden}
+#probeB{position:fixed;bottom:0;height:env(safe-area-inset-bottom);width:1px;visibility:hidden}
+
+/* header */
+.head{position:fixed;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top) + 10px) 16px 0;display:flex;align-items:center;gap:12px;z-index:50}
+.lv{font-size:20px;font-weight:700;white-space:nowrap}
+.lv small{font-size:14px;opacity:.6;font-weight:400;margin-left:6px}
+.prog{flex:1;height:6px;border-radius:9px;background:rgba(42,36,32,.12);overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),#d9774f);border-radius:9px;transition:width .3s}
+.left{font-size:14px;opacity:.75;white-space:nowrap;min-width:44px;text-align:right}
+.ib{appearance:none;border:0;background:rgba(42,36,32,.08);width:34px;height:34px;border-radius:50%;font-size:16px;color:var(--ink);font-family:inherit}
+
+/* stage & tiles */
+#stage{position:fixed;inset:0;z-index:10}
+.t{position:absolute;left:0;top:0;width:var(--tw);height:var(--th);border-radius:calc(var(--tw)*.16);
+  background:radial-gradient(circle at 50% 54%,var(--w) 0 28%,transparent 62%),linear-gradient(165deg,#fffdf7 0%,#f4e9d1 100%);
+  border:1px solid rgba(120,90,50,.2);
+  box-shadow:0 calc(var(--tw)*.075) 0 #c4aa7e,0 calc(var(--tw)*.11) calc(var(--tw)*.18) rgba(70,45,20,.26);
+  display:flex;align-items:center;justify-content:center;transition:transform .26s cubic-bezier(.2,.9,.25,1),opacity .3s}
+.t span{font-size:calc(var(--tw)*.66);line-height:1;color:var(--c);transform:translateY(-3%);pointer-events:none}
+.t::after{content:'';position:absolute;right:11%;bottom:10%;width:11%;height:11%;border-radius:2px;background:var(--c);opacity:.5}
+.t::before{content:'';position:absolute;inset:-1px;border-radius:inherit;background:rgba(44,33,22,.52);opacity:0;transition:opacity .25s;pointer-events:none;z-index:2}
+.t.dim::before{opacity:1}
+.t.wig span{animation:wig .28s}
+@keyframes wig{25%{transform:translateX(-8%)}75%{transform:translateX(8%)}}
+.t.pop{opacity:0;transition:transform .32s ease-out,opacity .32s ease-out}
+.t.flip span{animation:flip .4s}
+@keyframes flip{50%{transform:scale(0,1)}}
+.ink{position:absolute;border-radius:50%;pointer-events:none;z-index:4000;transition:transform .6s cubic-bezier(.1,.8,.3,1),opacity .6s}
+.tray{position:absolute;z-index:5;border-radius:16px;background:linear-gradient(#3b332c,#221c18);box-shadow:inset 0 4px 10px rgba(0,0,0,.65),0 2px 0 rgba(255,255,255,.55),0 10px 24px rgba(40,25,10,.25);transition:box-shadow .2s}
+.tray.full{animation:trayshake .4s;box-shadow:inset 0 4px 10px rgba(0,0,0,.65),0 0 0 3px var(--red)}
+@keyframes trayshake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.slot{position:absolute;border-radius:calc(var(--tw)*.14);background:rgba(255,255,255,.05);box-shadow:inset 0 2px 4px rgba(0,0,0,.4)}
+.hold{position:absolute;z-index:5;border:1.5px dashed rgba(42,36,32,.22);border-radius:14px;opacity:0;transition:opacity .3s}
+.hold.on{opacity:1}
+.float{position:fixed;left:50%;z-index:6000;transform:translate(-50%,0);font-size:30px;color:var(--red);pointer-events:none;text-shadow:0 2px 0 #fff8ea;animation:fl 1s forwards;white-space:nowrap}
+@keyframes fl{0%{opacity:0;transform:translate(-50%,10px) scale(.6)}20%{opacity:1;transform:translate(-50%,0) scale(1.1)}100%{opacity:0;transform:translate(-50%,-40px) scale(1)}}
+
+/* tools */
+.tools{position:fixed;left:0;right:0;bottom:0;z-index:50;padding:8px 16px calc(env(safe-area-inset-bottom) + 12px);display:flex;justify-content:center;gap:16px}
+.tool{appearance:none;position:relative;border:0;width:76px;height:52px;border-radius:14px;background:var(--red);color:#fff6e8;font-size:17px;font-family:inherit;font-weight:700;letter-spacing:2px;box-shadow:0 4px 0 var(--red-d),0 8px 14px rgba(125,34,25,.25)}
+.tool:active{transform:translateY(3px);box-shadow:0 1px 0 var(--red-d)}
+.tool:disabled{background:#a89c8a;box-shadow:0 4px 0 #7c7264;opacity:.7}
+.tool b{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;border-radius:10px;background:var(--ink);color:#fff;font-size:12px;line-height:20px;letter-spacing:0}
+
+/* overlays */
+.ov{position:fixed;inset:0;z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:rgba(239,229,207,.86);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:opacity .3s}
+.hide{opacity:0;pointer-events:none}
+.logo{display:flex;align-items:flex-start;gap:10px}
+.logo .big{font-size:110px;line-height:1;letter-spacing:4px}
+.vseal{writing-mode:vertical-rl;background:var(--red);color:#fff4e6;font-size:15px;padding:8px 5px;border-radius:4px;letter-spacing:4px;margin-top:14px;box-shadow:inset 0 0 0 2px var(--red),inset 0 0 0 3.5px rgba(255,244,230,.7)}
+.sub{font-size:15px;line-height:1.9;opacity:.8}
+.btn{appearance:none;border:0;border-radius:999px;padding:15px 44px;font-size:18px;font-weight:700;font-family:inherit;letter-spacing:3px;color:#fff6e8;background:var(--ink);box-shadow:0 4px 0 #000,0 10px 20px rgba(0,0,0,.2)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+.btn.red{background:var(--red);box-shadow:0 4px 0 var(--red-d),0 10px 20px rgba(125,34,25,.25)}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:none;border:1.5px solid rgba(42,36,32,.4);font-size:15px;padding:11px 28px}
+.seal{width:128px;height:128px;border-radius:14px;background:var(--red);color:#fff4e6;font-size:92px;display:flex;align-items:center;justify-content:center;transform:rotate(-8deg);box-shadow:inset 0 0 0 6px var(--red),inset 0 0 0 9px rgba(255,244,230,.75),0 10px 30px rgba(125,34,25,.3);animation:stamp .5s cubic-bezier(.3,1.4,.5,1) both}
+.seal.gray{background:#4a423b;box-shadow:inset 0 0 0 6px #4a423b,inset 0 0 0 9px rgba(255,244,230,.6),0 10px 30px rgba(0,0,0,.25)}
+@keyframes stamp{0%{transform:scale(2.6) rotate(-8deg);opacity:0}100%{transform:scale(1) rotate(-8deg);opacity:1}}
+.h2{font-size:24px;font-weight:700}
+.tip{font-size:13px;opacity:.6;max-width:300px;line-height:1.7}
+.copy{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 14px);font-size:12px;opacity:.45;text-align:center;pointer-events:none}
+#toast{position:fixed;left:50%;top:40%;transform:translateX(-50%);z-index:9500;background:var(--ink);color:#fff6e8;padding:10px 18px;border-radius:999px;font-size:14px;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="probeT"></div><div id="probeB"></div>
+<div id="bg">
+  <div class="sun"></div>
+  <svg viewBox="0 0 400 200" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 120 C40 80 70 60 110 95 C140 120 160 70 200 60 C240 50 260 100 300 85 C340 70 370 90 400 75 L400 200 L0 200Z" fill="#2a2420" opacity=".06"/>
+    <path d="M0 150 C30 125 60 110 95 135 C130 158 150 115 190 112 C230 109 250 145 290 135 C330 125 360 140 400 120 L400 200 L0 200Z" fill="#2a2420" opacity=".08"/>
+    <path d="M0 175 C50 160 90 168 140 178 C190 188 230 162 280 168 C330 174 370 160 400 165 L400 200 L0 200Z" fill="#2a2420" opacity=".1"/>
+  </svg>
+</div>
+
+<div class="head" id="head">
+  <button class="ib" id="homeBtn" aria-label="返回">☰</button>
+  <div class="lv" id="lv">第 1 关</div>
+  <div class="prog"><i id="prog"></i></div>
+  <div class="left" id="left"></div>
+</div>
+<div id="stage"></div>
+<div class="tools" id="tools">
+  <button class="tool" id="tOut">移出<b>1</b></button>
+  <button class="tool" id="tUndo">撤回<b>1</b></button>
+  <button class="tool" id="tShuf">洗牌<b>1</b></button>
+</div>
+
+<div class="ov" id="menu">
+  <div class="logo"><div class="big cal">叠印</div><div class="vseal">三枚即消</div></div>
+  <div class="sub">层层叠叠，只能拾取未被压住的牌<br>同字三枚，自成一印，随即消散<br>槽满七枚，便是一败</div>
+  <button class="btn red" id="playBtn">开始</button>
+  <div class="tip" id="menuInfo"></div>
+  <div class="copy">© 2026 wilsonmah 版权所有 · All Rights Reserved</div>
+</div>
+
+<div class="ov hide" id="win">
+  <div class="seal cal">过</div>
+  <div class="h2" id="winT"></div>
+  <div class="tip" id="winS"></div>
+  <button class="btn red" id="nextBtn">下一关</button>
+  <button class="btn ghost" id="shareBtn1">炫耀一下</button>
+</div>
+
+<div class="ov hide" id="lose">
+  <div class="seal gray cal">败</div>
+  <div class="h2" id="loseT">槽位已满</div>
+  <div class="tip" id="loseS"></div>
+  <button class="btn red" id="reviveBtn">移出三枚 · 续命</button>
+  <button class="btn" id="retryBtn">重新挑战</button>
+  <button class="btn ghost" id="shareBtn2">喊朋友来试试</button>
+  <div class="tip" id="tip"></div>
+</div>
+<div id="toast" class="hide"></div>
+
+<script>
+/*!
+ * 叠印 Stamp Stack
+ * Copyright (c) 2026 wilsonmah. All Rights Reserved.
+ * 未经作者书面许可，禁止复制、修改、分发或商用本游戏的代码与设计。
+ */
+(() => {
+const $ = s => document.querySelector(s);
+const stage = $('#stage');
+
+const TYPES = [
+  { ch: '梅', c: '#c0392b' }, { ch: '松', c: '#7b3f9e' }, { ch: '竹', c: '#2e7d32' }, { ch: '菊', c: '#c98a00' },
+  { ch: '月', c: '#1f4e79' }, { ch: '山', c: '#5d4037' }, { ch: '水', c: '#0b7f8a' }, { ch: '云', c: '#5763b8' },
+  { ch: '风', c: '#546e7a' }, { ch: '花', c: '#d1336f' }, { ch: '雪', c: '#2f86d0' }, { ch: '鹤', c: '#1c1c1c' }
+];
+const TERMS = '立春 雨水 惊蛰 春分 清明 谷雨 立夏 小满 芒种 夏至 小暑 大暑 立秋 处暑 白露 秋分 寒露 霜降 立冬 小雪 大雪 冬至 小寒 大寒'.split(' ');
+const TIPS = ['先翻两侧的暗牌，越晚翻越被动', '优先拿压住牌最多的那一枚', '槽里同时攒的字别超过三种', '道具每关各一次，留到最后关头', '撤回可以救回手滑的那一下', '洗牌只换字，不换位置'];
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+let level = store.get('ss_level', 1);
+let tries = store.get('ss_tries', {});
+
+// ---------------- audio ----------------
+let ac;
+function unlock() { try { if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} }
+function tone(f, d, type = 'sine', v = 0.1, slide = 0) {
+  if (!ac) return;
+  const t0 = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t0);
+  if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(30, f + slide), t0 + d);
+  g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(v, t0 + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + d);
+  o.connect(g); g.connect(ac.destination); o.start(t0); o.stop(t0 + d + 0.03);
+}
+const PENTA = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.5, 1568];
+const sTock = () => { tone(1500, 0.05, 'triangle', 0.08, -800); };
+const sBad = () => tone(150, 0.15, 'square', 0.04, -50);
+const sMatch = c => { const i = Math.min(c - 1, 6); tone(PENTA[i], 0.45, 'sine', 0.13); setTimeout(() => tone(PENTA[i + 2], 0.5, 'sine', 0.08), 80); };
+const sLose = () => { tone(330, 0.35, 'sine', 0.1, -100); setTimeout(() => tone(247, 0.6, 'sine', 0.1, -60), 200); };
+const sWin = () => [0, 2, 4, 5, 7].forEach((k, i) => setTimeout(() => tone(PENTA[k], 0.6, 'sine', 0.1), i * 110));
+const sTool = () => { tone(700, 0.12, 'triangle', 0.08, 500); };
+
+// ---------------- level generation ----------------
+function rngOf(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function cfgOf(n) {
+  if (n === 1) return { types: 3, k: 1, stack: 0 };
+  if (n === 2) return { types: 9, layers: 7, target: 138, k: 3, stack: 9 };
+  return {
+    types: Math.min(12, 9 + Math.floor((n - 2) / 2)),
+    layers: Math.min(10, 7 + Math.floor((n - 2) / 2)),
+    target: Math.min(216, 138 + (n - 2) * 12),
+    k: 3, stack: Math.min(15, 9 + (n - 2))
+  };
+}
+const covers = (o, t) => o.layer > t.layer && Math.abs(o.x - t.x) < 1.99 && Math.abs(o.y - t.y) < 1.99;
+
+function generate(n) {
+  const c = cfgOf(n), R = rngOf(n * 7919 + 17);
+  let ts = [];
+  if (n === 1) {
+    for (const x of [3, 5, 7, 9]) for (const y of [4, 6, 8]) ts.push({ x, y, layer: 0 });
+    for (const x of [4, 6, 8]) for (const y of [5, 7]) ts.push({ x, y, layer: 1 });
+  } else {
+    for (let L = 0; L < c.layers; L++) {
+      const ox = L % 2, oy = (L >> 1) % 2;
+      const cols = ox ? 6 : 7, rows = oy ? 6 : 7;
+      const p = Math.max(0.42, 0.86 - L * 0.055);
+      for (let r = 0; r < rows; r++) for (let cc = 0; cc < Math.ceil(cols / 2); cc++) {
+        const dx = Math.abs(cc - (cols - 1) / 2) / (cols / 2), dy = Math.abs(r - (rows - 1) / 2) / (rows / 2);
+        if (R() < p * (1.3 - (dx + dy * 0.8) * 0.62)) {
+          const m = cols - 1 - cc;
+          ts.push({ x: ox + 2 * cc, y: oy + 2 * r, layer: L });
+          if (m !== cc) ts.push({ x: ox + 2 * m, y: oy + 2 * r, layer: L });
+        }
+      }
+    }
+    const mainTarget = c.target - c.stack * 2;
+    while (ts.length > mainTarget) {
+      const t = ts[Math.floor(R() * ts.length)];
+      ts = ts.filter(o => !(o === t || (o.layer === t.layer && o.y === t.y && o.x === 12 - t.x)));
+    }
+    for (let s = 0; s < 2; s++) for (let i = 0; i < c.stack; i++)
+      ts.push({ x: s ? 12 - i * 0.24 : i * 0.24, y: 14, layer: 20 + i, stack: true });
+    while (ts.length % 3) {
+      const centers = ts.filter(o => !o.stack && o.x === 6);
+      const pool = centers.length ? centers : ts.filter(o => !o.stack);
+      ts.splice(ts.indexOf(pool[Math.floor(R() * pool.length)]), 1);
+    }
+  }
+  // simulate a legal clearing order, then deal types along it -> always solvable
+  let rem = ts.slice(); const order = [];
+  while (rem.length) {
+    const free = rem.filter(t => !rem.some(o => covers(o, t)));
+    const pk = free[Math.floor(R() * free.length)];
+    order.push(pk); rem.splice(rem.indexOf(pk), 1);
+  }
+  const open = []; let need = 0;
+  order.forEach((t, i) => {
+    const left = order.length - i;
+    let s;
+    if (open.length === 0 || (open.length < c.k && left >= need + 3 && R() < 0.55)) {
+      s = { type: Math.floor(R() * c.types), n: 0 }; open.push(s); need += 3;
+    } else s = open[Math.floor(R() * open.length)];
+    t.type = s.type; s.n++; need--;
+    if (s.n === 3) open.splice(open.indexOf(s), 1);
+  });
+  return ts;
+}
+
+// ---------------- state ----------------
+let G, tiles = [], board = [], bar = [], hold = [], hist = [], tools, state = 'menu', combo = 0, lastMatch = 0, total = 0;
+const tray = document.createElement('div'); tray.className = 'tray';
+const holdBox = document.createElement('div'); holdBox.className = 'hold';
+
+function layout() {
+  const W = innerWidth, H = innerHeight;
+  const st = $('#probeT').offsetHeight, sb = $('#probeB').offsetHeight;
+  const headH = 56, toolH = 80;
+  const avail = H - st - sb - headH - toolH;
+  const tw = Math.max(30, Math.min((W - 36) / 7.4, (avail - 58) / (10 * 1.12), 64));
+  const th = tw * 1.12, gap = Math.max(2, tw * 0.06);
+  const bw = 7 * tw, bx = (W - bw) / 2;
+  const used = 10 * th + 58;
+  const by = st + headH + Math.max(0, (avail - used) * 0.35);
+  const holdY = by + 8 * th + 10;
+  const barY = holdY + th + 16;
+  const barW = 7 * tw + 6 * gap + 16, barX = (W - barW) / 2;
+  const rowW = 7 * tw + 6 * gap, rowX = (W - rowW) / 2;
+  G = { tw, th, gap, bx, by, holdY, barY, barX, barW, rowX };
+  document.documentElement.style.setProperty('--tw', tw + 'px');
+  document.documentElement.style.setProperty('--th', th + 'px');
+  Object.assign(tray.style, { left: barX + 'px', top: barY + 'px', width: barW + 'px', height: (th + 18) + 'px' });
+  tray.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const s = document.createElement('div'); s.className = 'slot';
+    Object.assign(s.style, { left: (8 + i * (tw + gap)) + 'px', top: '9px', width: tw + 'px', height: th + 'px' });
+    tray.appendChild(s);
+  }
+  Object.assign(holdBox.style, { left: (rowX - 6) + 'px', top: (holdY - 5) + 'px', width: (rowW + 12) + 'px', height: (th + 10) + 'px' });
+}
+
+function posOf(t) {
+  if (t.where === 'board') return [G.bx + t.x * G.tw / 2, G.by + t.y * G.th / 2, t.layer * 10 + 10];
+  if (t.where === 'bar') { const i = bar.indexOf(t); return [G.barX + 8 + i * (G.tw + G.gap), G.barY + 9, 3000 + i]; }
+  const i = hold.indexOf(t); return [G.rowX + i * (G.tw + G.gap), G.holdY, 2500 + i];
+}
+function place(t, extra = '') {
+  const [x, y, z] = posOf(t);
+  t.el.style.transform = `translate(${x}px,${y}px)${extra}`;
+  t.el.style.zIndex = z;
+}
+function setFace(t) {
+  const ty = TYPES[t.type];
+  t.el.style.setProperty('--c', ty.c);
+  t.el.style.setProperty('--w', ty.c + '2a');
+  t.el.firstChild.textContent = ty.ch;
+}
+function refreshFree() {
+  for (const t of board) {
+    t.free = !board.some(o => covers(o, t));
+    t.el.classList.toggle('dim', !t.free);
+  }
+}
+function placeAll() { for (const t of tiles) if (t.where !== 'gone') place(t); }
+
+function hud() {
+  const left = board.length + hold.length + bar.length;
+  $('#left').textContent = '剩 ' + left;
+  $('#prog').style.width = (100 * (1 - left / total)) + '%';
+  $('#lv').innerHTML = `第 ${level} 关<small>${TERMS[(level - 1) % 24]}</small>`;
+  for (const [id, k] of [['#tOut', 'out'], ['#tUndo', 'undo'], ['#tShuf', 'shuf']]) {
+    const b = $(id); b.querySelector('b').textContent = tools[k]; b.disabled = tools[k] <= 0;
+  }
+  holdBox.classList.toggle('on', hold.length > 0);
+}
+
+function build(n) {
+  stage.innerHTML = ''; stage.appendChild(holdBox); stage.appendChild(tray);
+  tray.classList.remove('full');
+  layout();
+  const data = generate(n);
+  tiles = data.map((d, i) => ({ ...d, id: i, where: 'board' }));
+  board = tiles.slice(); bar = []; hold = []; hist = [];
+  tools = { out: 1, undo: 1, shuf: 1 };
+  combo = 0; total = tiles.length;
+  const R = rngOf(Date.now() & 0xffff);
+  for (const t of tiles) {
+    const e = document.createElement('div'); e.className = 't cal'; e.innerHTML = '<span></span>';
+    e._t = t; t.el = e; setFace(t);
+    e.style.transition = 'none'; e.style.opacity = '0';
+    stage.appendChild(e);
+    place(t, ' translateY(-46px) scale(.85)');
+  }
+  refreshFree();
+  void stage.offsetWidth;
+  requestAnimationFrame(() => {
+    for (const t of tiles) {
+      t.el.style.transition = '';
+      const d = (t.layer % 20) * 55 + (t.stack ? 380 : 0) + R() * 160;
+      t.el.style.transitionDelay = d + 'ms';
+      t.el.style.opacity = '1';
+      place(t);
+    }
+    setTimeout(() => { for (const t of tiles) t.el.style.transitionDelay = ''; }, 1400);
+  });
+  state = 'play';
+  hud();
+}
+
+// ---------------- actions ----------------
+function pick(t) {
+  if (state !== 'play' || t.where === 'bar' || t.where === 'gone') return;
+  unlock();
+  if (t.where === 'board' && !t.free) {
+    sBad(); t.el.classList.remove('wig'); void t.el.offsetWidth; t.el.classList.add('wig'); return;
+  }
+  const from = t.where;
+  if (from === 'board') board.splice(board.indexOf(t), 1); else hold.splice(hold.indexOf(t), 1);
+  let idx = -1;
+  for (let i = bar.length - 1; i >= 0; i--) if (bar[i].type === t.type) { idx = i + 1; break; }
+  if (idx < 0) idx = bar.length;
+  bar.splice(idx, 0, t); t.where = 'bar';
+  t.el.classList.remove('dim');
+  hist.push({ t, from });
+  sTock();
+  const same = bar.filter(o => o.type === t.type);
+  if (same.length === 3) {
+    bar = bar.filter(o => o.type !== t.type);
+    hist = hist.filter(h => !same.includes(h.t));
+    for (const o of same) o.where = 'gone';
+    bar.forEach(o => place(o)); // others settle while trio stays put
+    for (const o of same) if (o !== t) { /* keep in place */ }
+    place2(t, idx, same);
+    const now = performance.now();
+    combo = now - lastMatch < 2600 ? combo + 1 : 1; lastMatch = now;
+    setTimeout(() => {
+      sMatch(combo);
+      const mid = same[1].el.getBoundingClientRect();
+      inkBurst(mid.left + mid.width / 2, mid.top + mid.height / 2, TYPES[t.type].c);
+      for (const o of same) {
+        o.el.classList.add('pop');
+        o.el.style.transform += ' scale(1.35) translateY(-14px)';
+        setTimeout(() => o.el.remove(), 340);
+      }
+      if (combo >= 2) floatText(`连消 ×${combo}`);
+      checkWin();
+    }, 240);
+  } else {
+    bar.forEach(o => place(o));
+    if (bar.length >= 7) lose();
+  }
+  if (from === 'board') refreshFree();
+  hud();
+}
+// trio: freeze the two already-in-bar tiles where they are and land the new one right after them
+function place2(t, idx, same) {
+  const others = same.filter(o => o !== t);
+  const base = others.map(o => o.el.style.transform);
+  const m = /translate\(([-\d.]+)px,([-\d.]+)px\)/.exec(base[base.length - 1]);
+  if (m) {
+    t.el.style.transform = `translate(${+m[1] + G.tw + G.gap}px,${m[2]}px)`;
+    t.el.style.zIndex = 3500;
+  }
+}
+
+function checkWin() {
+  if (state === 'play' && !board.length && !hold.length && !bar.length) {
+    state = 'win';
+    const n = level;
+    level++; store.set('ss_level', level);
+    setTimeout(() => {
+      sWin();
+      $('#winT').textContent = `第 ${n} 关 · ${TERMS[(n - 1) % 24]} 已过`;
+      const tr = tries[n] || 1;
+      $('#winS').textContent = tr > 1 ? `尝试 ${tr} 次终于拿下` : '一次通关，手气与眼力兼备';
+      show('#win');
+    }, 450);
+  }
+}
+function lose() {
+  state = 'lose';
+  tries[level] = (tries[level] || 1) + 1; store.set('ss_tries', tries);
+  setTimeout(() => { tray.classList.add('full'); sLose(); }, 260);
+  setTimeout(() => {
+    const left = board.length + hold.length + bar.length;
+    const pct = Math.round(100 * (1 - left / total));
+    $('#loseS').textContent = `已清 ${pct}% · 还剩 ${left} 枚`;
+    $('#reviveBtn').style.display = tools.out > 0 && hold.length + 3 <= 7 ? '' : 'none';
+    $('#tip').textContent = '提示：' + TIPS[Math.floor(Math.random() * TIPS.length)];
+    show('#lose');
+  }, 900);
+}
+
+function doOut() {
+  if (tools.out <= 0) return false;
+  if (!bar.length) { toast('槽里还没有牌'); return false; }
+  const n = Math.min(3, bar.length);
+  if (hold.length + n > 7) { toast('暂存区已满'); return false; }
+  const moved = bar.splice(0, n);
+  for (const t of moved) { t.where = 'hold'; hold.push(t); }
+  hist = hist.filter(h => !moved.includes(h.t));
+  tools.out--; sTool();
+  placeAll(); hud();
+  return true;
+}
+function doUndo() {
+  if (tools.undo <= 0 || state !== 'play') return;
+  const h = hist[hist.length - 1];
+  if (!h || h.t.where !== 'bar') { toast('没有可撤回的牌'); return; }
+  hist.pop();
+  const t = h.t;
+  bar.splice(bar.indexOf(t), 1);
+  t.where = h.from;
+  if (h.from === 'board') board.push(t); else hold.push(t);
+  tools.undo--; sTool();
+  refreshFree(); placeAll(); hud();
+}
+function doShuf() {
+  if (tools.shuf <= 0 || state !== 'play') return;
+  const types = board.map(t => t.type);
+  for (let i = types.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [types[i], types[j]] = [types[j], types[i]]; }
+  board.forEach((t, i) => {
+    t.type = types[i];
+    t.el.classList.remove('flip'); void t.el.offsetWidth; t.el.classList.add('flip');
+    setTimeout(() => setFace(t), 200);
+  });
+  tools.shuf--; sTool(); hud();
+}
+
+// ---------------- fx ----------------
+function inkBurst(x, y, color) {
+  for (let i = 0; i < 14; i++) {
+    const d = document.createElement('div'); d.className = 'ink';
+    const s = 4 + Math.random() * 9;
+    Object.assign(d.style, { left: (x - s / 2) + 'px', top: (y - s / 2) + 'px', width: s + 'px', height: s + 'px', background: color, opacity: '.85' });
+    document.body.appendChild(d);
+    const a = Math.random() * Math.PI * 2, r = 30 + Math.random() * 70;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      d.style.transform = `translate(${Math.cos(a) * r}px,${Math.sin(a) * r}px) scale(${0.4 + Math.random()})`;
+      d.style.opacity = '0';
+    }));
+    setTimeout(() => d.remove(), 700);
+  }
+}
+function floatText(s) {
+  const f = document.createElement('div'); f.className = 'float cal'; f.textContent = s;
+  f.style.top = (G.holdY - 10) + 'px';
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1000);
+}
+function toast(m) {
+  const e = $('#toast'); e.textContent = m; e.classList.remove('hide');
+  clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.add('hide'), 1400);
+}
+function show(id) { for (const o of ['#menu', '#win', '#lose']) $(o).classList.toggle('hide', o !== id); }
+function hideAll() { show(null); }
+
+async function share() {
+  const url = location.href.split('#')[0].split('?')[0];
+  const n = Math.max(1, level - 1);
+  const text = level > 2 ? `我在「叠印」已经闯过第 ${n} 关，你能过第二关吗？` : '这个水墨三消第二关太难了，你来试试？';
+  if (navigator.share) { try { await navigator.share({ title: '叠印', text, url }); } catch (e) {} }
+  else { try { await navigator.clipboard.writeText(text + ' ' + url); toast('链接已复制'); } catch (e) { toast(url); } }
+}
+
+// ---------------- wiring ----------------
+stage.addEventListener('pointerdown', e => { const el = e.target.closest('.t'); if (el && el._t) { e.preventDefault(); pick(el._t); } });
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+document.addEventListener('gesturestart', e => e.preventDefault());
+$('#tOut').onclick = () => { unlock(); if (state === 'play') doOut(); };
+$('#tUndo').onclick = () => { unlock(); doUndo(); };
+$('#tShuf').onclick = () => { unlock(); doShuf(); };
+let paused = false;
+$('#playBtn').onclick = () => {
+  unlock(); hideAll();
+  if (paused) { paused = false; state = 'play'; } else build(level);
+};
+$('#nextBtn').onclick = () => { hideAll(); build(level); };
+$('#retryBtn').onclick = () => { hideAll(); build(level); };
+$('#reviveBtn').onclick = () => {
+  tray.classList.remove('full'); state = 'play';
+  if (doOut()) hideAll(); else state = 'lose';
+};
+$('#homeBtn').onclick = () => {
+  if (state !== 'play') return;
+  state = 'menu'; paused = true; menuInfo();
+  $('#playBtn').textContent = '继续'; show('#menu');
+};
+$('#shareBtn1').onclick = share; $('#shareBtn2').onclick = share;
+addEventListener('resize', () => { if (!tiles.length) return; layout(); placeAll(); });
+$('#playBtn').addEventListener('click', () => { $('#playBtn').textContent = '开始'; });
+
+function menuInfo() { $('#menuInfo').textContent = level > 1 ? `当前进度：第 ${level} 关 · ${TERMS[(level - 1) % 24]}` : '第一关是热身，第二关见真章'; }
+menuInfo();
+layout();
+})();
+</script>
+</body>
+</html>
