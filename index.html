@@ -86,6 +86,38 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.55;b
 .h2{font-size:24px;font-weight:700}
 .tip{font-size:13px;opacity:.6;max-width:300px;line-height:1.7}
 .copy{position:fixed;left:0;right:0;bottom:calc(env(safe-area-inset-bottom) + 14px);font-size:12px;opacity:.45;text-align:center;pointer-events:none}
+/* weather */
+.wx{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 52px);z-index:50;display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:rgba(42,36,32,.08);font-size:13px;white-space:nowrap;transition:opacity .3s}
+.wx b{min-width:20px;height:20px;border-radius:10px;background:var(--red);color:#fff;font-size:12px;line-height:20px;text-align:center;padding:0 5px;font-weight:700}
+.wx.warn b{animation:pulse .6s infinite}
+.wx.nob b{display:none}
+@keyframes pulse{50%{transform:scale(1.3)}}
+#wxban{position:fixed;inset:0;z-index:8000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;pointer-events:none;transition:opacity .6s;background:radial-gradient(ellipse at center,rgba(239,229,207,.92) 0,rgba(239,229,207,.6) 45%,rgba(239,229,207,0) 75%)}
+#wxban .t1{font-size:96px;line-height:1;color:var(--ink)}
+#wxban .s2{background:var(--red);color:#fff6e8;padding:5px 14px;border-radius:6px;font-size:18px;letter-spacing:4px;transform:rotate(-3deg);box-shadow:inset 0 0 0 2px var(--red),inset 0 0 0 3.5px rgba(255,244,230,.7)}
+#wxban .t2{font-size:15px;max-width:290px;line-height:1.7;text-align:center}
+#flash{position:fixed;inset:0;z-index:7000;background:#fffdf5;opacity:0;pointer-events:none}
+#flash.on{animation:flash .6s}
+@keyframes flash{0%{opacity:.95}15%{opacity:.15}30%{opacity:.8}100%{opacity:0}}
+#rainfx{position:fixed;inset:0;z-index:45;pointer-events:none;opacity:0;transition:opacity 1s;background-image:repeating-linear-gradient(103deg,transparent 0 22px,rgba(50,60,80,.13) 22px 23px,transparent 23px 47px);background-size:240px 240px;animation:rain .5s linear infinite}
+#rainfx.on{opacity:1}
+@keyframes rain{to{background-position:-55px 240px}}
+.mist{position:absolute;z-index:2400;pointer-events:none;border-radius:18px;transition:height .8s ease;background:linear-gradient(to bottom,rgba(242,234,216,.62) 0,rgba(242,234,216,.5) calc(100% - 40px),rgba(242,234,216,0) 100%);overflow:hidden}
+.mist::after{content:'';position:absolute;inset:-20%;background:radial-gradient(ellipse at 25% 35%,rgba(255,255,255,.55),transparent 55%),radial-gradient(ellipse at 70% 65%,rgba(255,255,255,.45),transparent 50%);animation:drift 7s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(30px) translateY(10px)}}
+.t.blur span{filter:blur(6px);opacity:.3;transition:filter .4s,opacity .4s}
+.t.misty span{filter:blur(4px);opacity:.22}
+.t.misty::after{opacity:.1}
+.t .leaf{position:absolute;inset:-6%;display:flex;align-items:center;justify-content:center;font-size:calc(var(--tw)*.74);border-radius:inherit;z-index:3;background:radial-gradient(circle,rgba(239,229,207,.97) 0 46%,rgba(239,229,207,.75) 62%,rgba(239,229,207,0) 74%);animation:leafin .7s cubic-bezier(.3,1.3,.5,1)}
+.t .leaf.off{animation:leafout .35s forwards}
+@keyframes leafin{from{transform:translate(-40%,-160%) rotate(-120deg);opacity:0}}
+@keyframes leafout{to{transform:translate(120%,-40%) rotate(140deg);opacity:0}}
+.t .icefx{position:absolute;inset:-1px;border-radius:inherit;z-index:3;pointer-events:none;background:linear-gradient(135deg,rgba(205,232,255,.62),rgba(150,198,240,.38) 50%,rgba(225,242,255,.66));box-shadow:inset 0 0 0 2px rgba(255,255,255,.75),inset 0 0 14px rgba(110,170,230,.65)}
+.t .icefx::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(58deg,transparent 44%,rgba(255,255,255,.85) 45.5%,transparent 47.5%),linear-gradient(-32deg,transparent 58%,rgba(255,255,255,.7) 59.5%,transparent 61.5%),linear-gradient(15deg,transparent 70%,rgba(255,255,255,.5) 71%,transparent 72.5%)}
+.t .icefx.crack{animation:crack .38s forwards}
+@keyframes crack{30%{transform:scale(1.04) rotate(2deg)}to{opacity:0;transform:scale(1.35)}}
+.t .icefx.new{animation:freeze .5s}
+@keyframes freeze{from{opacity:0;transform:scale(.6)}}
 #toast{position:fixed;left:50%;top:40%;transform:translateX(-50%);z-index:9500;background:var(--ink);color:#fff6e8;padding:10px 18px;border-radius:999px;font-size:14px;transition:opacity .3s;pointer-events:none;white-space:nowrap}
 </style>
 </head>
@@ -138,6 +170,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;opacity:.55;b
   <button class="btn ghost" id="shareBtn2">喊朋友来试试</button>
   <div class="tip" id="tip"></div>
 </div>
+<div class="wx hide" id="wx"><span id="wxI"></span><span id="wxN"></span><b id="wxC"></b></div>
+<div id="wxban" class="hide"><div class="t1 cal" id="wbT"></div><div class="s2" id="wbS"></div><div class="t2" id="wbR"></div></div>
+<div id="rainfx"></div>
+<div id="flash"></div>
 <div id="toast" class="hide"></div>
 
 <script>
@@ -157,6 +193,27 @@ const TYPES = [
 ];
 const TERMS = '立春 雨水 惊蛰 春分 清明 谷雨 立夏 小满 芒种 夏至 小暑 大暑 立秋 处暑 白露 秋分 寒露 霜降 立冬 小雪 大雪 冬至 小寒 大寒'.split(' ');
 const TIPS = ['先翻两侧的暗牌，越晚翻越被动', '优先拿压住牌最多的那一枚', '槽里同时攒的字别超过三种', '道具每关各一次，留到最后关头', '撤回可以救回手滑的那一下', '洗牌只换字，不换位置'];
+const WX_TIPS = {
+  rain: '墨雨来前先记住顶层的字，洇湿了也能凭记忆拿',
+  thunder: '雷响前一步别留半组在槽里，留意顶部的倒数',
+  mist: '先清下半区让雾散开，雾里的牌是在赌',
+  leaf: '落叶偏爱你槽里缺的字，扫叶子不占槽位',
+  ice: '冰封的牌要敲两下，先把挡路的冰敲碎'
+};
+// 天象：第三关起，每个节气对应一种
+const WX = {
+  rain: { icon: '☔', rule: n => `每 ${n} 步，雨水会洇湿可拿的牌，字迹模糊片刻` },
+  thunder: { icon: '⚡', rule: n => `每 ${n} 步一声雷，顶层两枚牌的字会互换` },
+  mist: { icon: '🌫', rule: () => '上半区笼着雾，看不清字；消得越多，雾散得越开' },
+  leaf: { icon: '🍂', rule: n => `每 ${n} 步飘落一片，盖住一枚牌，点一下才能扫开——它偏爱你正缺的字` },
+  ice: { icon: '❄', rule: n => `部分牌被冰封，敲一下破冰、再点才能拿；每 ${n} 步还会冻住一枚` }
+};
+const TERM_WX = [
+  ['ice', '残冰'], ['rain', '墨雨'], ['thunder', '春雷'], ['ice', '倒春寒'], ['mist', '清明雾'], ['rain', '谷雨'],
+  ['leaf', '落花', '🌸'], ['mist', '晨雾'], ['thunder', '雷雨'], ['rain', '梅雨'], ['thunder', '惊雷'], ['mist', '暑气'],
+  ['leaf', '落叶', '🍂'], ['rain', '秋雨'], ['mist', '白露'], ['leaf', '秋叶', '🍁'], ['ice', '寒露'], ['ice', '霜降'],
+  ['leaf', '残叶', '🍂'], ['ice', '小雪'], ['leaf', '积雪', '❄️'], ['mist', '冬雾'], ['rain', '冻雨'], ['ice', '大寒']
+];
 
 const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -184,6 +241,11 @@ const sMatch = c => { const i = Math.min(c - 1, 6); tone(PENTA[i], 0.45, 'sine',
 const sLose = () => { tone(330, 0.35, 'sine', 0.1, -100); setTimeout(() => tone(247, 0.6, 'sine', 0.1, -60), 200); };
 const sWin = () => [0, 2, 4, 5, 7].forEach((k, i) => setTimeout(() => tone(PENTA[k], 0.6, 'sine', 0.1), i * 110));
 const sTool = () => { tone(700, 0.12, 'triangle', 0.08, 500); };
+const sThunder = () => { tone(70, 0.9, 'sawtooth', 0.12, -30); tone(110, 0.5, 'square', 0.05, -60); setTimeout(() => tone(55, 1.1, 'sawtooth', 0.09, -15), 120); };
+const sRain = () => [0, 60, 130].forEach(d => setTimeout(() => tone(1800 + Math.random() * 900, 0.05, 'sine', 0.025, -600), d));
+const sCrack = () => { tone(2600, 0.06, 'square', 0.03, -1400); setTimeout(() => tone(1700, 0.08, 'triangle', 0.04, -900), 40); };
+const sFreeze = () => tone(1200, 0.4, 'sine', 0.04, 900);
+const sLeaf = () => tone(900, 0.1, 'triangle', 0.04, -400);
 
 // ---------------- level generation ----------------
 function rngOf(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -256,11 +318,13 @@ function generate(n) {
 let G, tiles = [], board = [], bar = [], hold = [], hist = [], tools, state = 'menu', combo = 0, lastMatch = 0, total = 0;
 const tray = document.createElement('div'); tray.className = 'tray';
 const holdBox = document.createElement('div'); holdBox.className = 'hold';
+const mistEl = document.createElement('div'); mistEl.className = 'mist';
+let W = null, mistLine = 0;
 
 function layout() {
   const W = innerWidth, H = innerHeight;
   const st = $('#probeT').offsetHeight, sb = $('#probeB').offsetHeight;
-  const headH = 56, toolH = 80;
+  const headH = 80, toolH = 80;
   const avail = H - st - sb - headH - toolH;
   const tw = Math.max(30, Math.min((W - 36) / 7.4, (avail - 58) / (10 * 1.12), 64));
   const th = tw * 1.12, gap = Math.max(2, tw * 0.06);
@@ -282,7 +346,10 @@ function layout() {
     tray.appendChild(s);
   }
   Object.assign(holdBox.style, { left: (rowX - 6) + 'px', top: (holdY - 5) + 'px', width: (rowW + 12) + 'px', height: (th + 10) + 'px' });
+  Object.assign(mistEl.style, { left: (bx - 8) + 'px', top: (by - 8) + 'px', width: (bw + 16) + 'px' });
+  mistHeight();
 }
+function mistHeight() { if (G) mistEl.style.height = Math.max(0, mistLine * G.th / 2 + 8 + 40) + 'px'; }
 
 function posOf(t) {
   if (t.where === 'board') return [G.bx + t.x * G.tw / 2, G.by + t.y * G.th / 2, t.layer * 10 + 10];
@@ -304,7 +371,83 @@ function refreshFree() {
   for (const t of board) {
     t.free = !board.some(o => covers(o, t));
     t.el.classList.toggle('dim', !t.free);
+    t.el.classList.toggle('misty', !!W && W.kind === 'mist' && !t.stack && t.y + 1 < mistLine);
   }
+}
+
+// ---------------- weather ----------------
+const shuffled = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function wxSetup(n) {
+  W = null; mistLine = 0;
+  $('#rainfx').classList.remove('on'); mistEl.remove();
+  $('#wx').classList.add('hide');
+  if (n < 3) return;
+  const [kind, name, icon] = TERM_WX[(n - 1) % 24], cyc = Math.floor((n - 3) / 24);
+  const every = { rain: Math.max(3, 5 - cyc), thunder: Math.max(6, 10 - cyc * 2), leaf: Math.max(3, 5 - cyc), ice: Math.max(5, 9 - cyc * 2), mist: 0 }[kind];
+  W = { kind, name, icon: icon || WX[kind].icon, every, cnt: every, cyc };
+  if (kind === 'rain') $('#rainfx').classList.add('on');
+  if (kind === 'ice') { const R = rngOf(n * 31 + 5), frac = .28 + cyc * .06; for (const t of board) if (R() < frac) freeze(t, true); }
+  if (kind === 'mist') { stage.appendChild(mistEl); mistLine = 8.5; mistHeight(); }
+  wxHud();
+  $('#wbT').textContent = TERMS[(n - 1) % 24];
+  $('#wbS').textContent = W.icon + ' ' + name;
+  $('#wbR').textContent = WX[kind].rule(every);
+  const ban = $('#wxban'); ban.classList.remove('hide');
+  clearTimeout(wxSetup.t); wxSetup.t = setTimeout(() => ban.classList.add('hide'), 2800);
+}
+function wxHud() {
+  const el = $('#wx');
+  if (!W) { el.classList.add('hide'); return; }
+  el.classList.remove('hide');
+  $('#wxI').textContent = W.icon; $('#wxN').textContent = W.name;
+  el.classList.toggle('nob', W.kind === 'mist');
+  $('#wxC').textContent = W.cnt;
+  el.classList.toggle('warn', W.kind !== 'mist' && W.cnt <= 2);
+}
+function wxTick() {
+  if (!W || state !== 'play') return;
+  if (W.kind === 'mist') {
+    const left = board.length + hold.length + bar.length;
+    mistLine = Math.max(0, 8.5 * (left / total) * 1.15 - 1.2); mistHeight(); refreshFree(); return;
+  }
+  if (--W.cnt <= 0) { W.cnt = W.every; wxEvent(); }
+  wxHud();
+}
+function wxEvent() {
+  const free = board.filter(t => t.free && !t.leaf && !t.ice);
+  if (W.kind === 'rain') {
+    sRain();
+    shuffled(free).slice(0, W.cyc > 0 ? 2 : 1).forEach(t => {
+      t.el.classList.add('blur'); clearTimeout(t.bt);
+      t.bt = setTimeout(() => t.el.classList.remove('blur'), 3500);
+    });
+  } else if (W.kind === 'thunder') {
+    const fl = $('#flash'); fl.classList.remove('on'); void fl.offsetWidth; fl.classList.add('on'); sThunder();
+    const a = shuffled(free), x = a[0], y = a.find(o => x && o.type !== x.type);
+    if (x && y) {
+      [x.type, y.type] = [y.type, x.type];
+      for (const t of [x, y]) { t.el.classList.remove('flip'); void t.el.offsetWidth; t.el.classList.add('flip'); setTimeout(() => setFace(t), 200); }
+    }
+  } else if (W.kind === 'leaf') {
+    if (board.filter(t => t.leaf).length >= 3) return;
+    const need = new Set(bar.map(b => b.type));
+    const pref = free.filter(t => need.has(t.type));
+    const pool = pref.length && Math.random() < .65 ? pref : free;
+    const t = pool[Math.floor(Math.random() * pool.length)];
+    if (t) { t.leaf = document.createElement('div'); t.leaf.className = 'leaf'; t.leaf.textContent = W.icon; t.el.appendChild(t.leaf); sLeaf(); }
+  } else if (W.kind === 'ice') {
+    const t = free[Math.floor(Math.random() * free.length)];
+    if (t) { freeze(t); sFreeze(); }
+  }
+}
+function freeze(t, init) {
+  t.ice = document.createElement('div'); t.ice.className = 'icefx' + (init ? '' : ' new'); t.el.appendChild(t.ice);
+}
+function crackIce(t) {
+  const ice = t.ice; t.ice = null; ice.classList.add('crack'); setTimeout(() => ice.remove(), 400); sCrack();
+}
+function brushLeaf(t) {
+  const lf = t.leaf; t.leaf = null; lf.classList.add('off'); setTimeout(() => lf.remove(), 380); sLeaf();
 }
 function placeAll() { for (const t of tiles) if (t.where !== 'gone') place(t); }
 
@@ -336,6 +479,7 @@ function build(n) {
     stage.appendChild(e);
     place(t, ' translateY(-46px) scale(.85)');
   }
+  wxSetup(n);
   refreshFree();
   void stage.offsetWidth;
   requestAnimationFrame(() => {
@@ -359,6 +503,9 @@ function pick(t) {
   if (t.where === 'board' && !t.free) {
     sBad(); t.el.classList.remove('wig'); void t.el.offsetWidth; t.el.classList.add('wig'); return;
   }
+  if (t.leaf) { brushLeaf(t); return; }
+  if (t.ice) { crackIce(t); return; }
+  t.el.classList.remove('blur', 'misty');
   const from = t.where;
   if (from === 'board') board.splice(board.indexOf(t), 1); else hold.splice(hold.indexOf(t), 1);
   let idx = -1;
@@ -395,6 +542,7 @@ function pick(t) {
     if (bar.length >= 7) lose();
   }
   if (from === 'board') refreshFree();
+  wxTick();
   hud();
 }
 // trio: freeze the two already-in-bar tiles where they are and land the new one right after them
@@ -431,7 +579,7 @@ function lose() {
     const pct = Math.round(100 * (1 - left / total));
     $('#loseS').textContent = `已清 ${pct}% · 还剩 ${left} 枚`;
     $('#reviveBtn').style.display = tools.out > 0 && hold.length + 3 <= 7 ? '' : 'none';
-    $('#tip').textContent = '提示：' + TIPS[Math.floor(Math.random() * TIPS.length)];
+    $('#tip').textContent = '提示：' + (W && Math.random() < .6 ? WX_TIPS[W.kind] : TIPS[Math.floor(Math.random() * TIPS.length)]);
     show('#lose');
   }, 900);
 }
